@@ -26,7 +26,6 @@
             flex: 0 0 310px; /* Stała szerokość */
             background-color: #c4d5e7;
             padding-top: 20px;
-            height: 100vh;
             text-align: center;
             font-size: 13px;
             font-family: Arial;
@@ -68,12 +67,12 @@
         <div class="sidebar">
             <h1><b>Available Tasks</b></h1>
             <ul class="nav flex-column">
-                <div class="btn bg-transparent border border-0"  onclick="window.location.href='{{ url_for('index') }}';"><img src="{{ url_for('static', filename='home.png') }}" width="25%" height="25%"><li class="nav-item">Home</li></div>
-                <div class="card bg-transparent border border-0"><a class="btn" href="{{ url_for('PullMembersOfAgroup') }}"><img src="{{ url_for('static', filename='members.png') }}" width="25%" height="25%"><li class="nav-item">Pull members of a group</a></li></div>
-                <div class="card bg-transparent border border-0"><a class="btn" href="{{ url_for('GetUserByPhoneNumber') }}"><img src="{{ url_for('static', filename='phone.png') }}" width="25%" height="25%"><li class="nav-item">Get user by phone number</a></li></div>
-                <div class="card bg-transparent border border-0"><a class="btn" href="{{ url_for('GetAllGroupsaUserIsaMemberOf') }}"><img src="{{ url_for('static', filename='memberof.png') }}" width="25%" height="25%"><li class="nav-item">Get all groups a user is a member of</a></li></div>
-                <div class="card bg-transparent border border-0"><a class="btn" href="{{ url_for('GetChangeHistoryOfaGivenGroup') }}"><img src="{{ url_for('static', filename='report.png') }}" width="25%" height="25%"><li class="nav-item">Get change history of a given group</a></li></div>
-                <div class="card bg-transparent border border-0"><a class="btn" href="{{ url_for('GetChangeHistoryOfaGivenUser') }}"><img src="{{ url_for('static', filename='change.png') }}" width="25%" height="25%"><li class="nav-item">Get change history of a given user</a></li></div>
+                <div class="btn bg-transparent" onclick="window.location.href='{{ url_for('index') }}';"><img src="{{ url_for('static', filename='home.png') }}" width="25%" height="25%"><li class="nav-item">Home</li></div>
+                <div class="btn bg-transparent"  onclick="window.location.href='{{ url_for('PullMembersOfAgroup') }}';"><img src="{{ url_for('static', filename='members.png') }}" width="25%" height="25%"><li class="nav-item">Pull members of a group</li></div>
+                <div class="btn bg-transparent"  onclick="window.location.href='{{ url_for('GetUserByPhoneNumber') }}';"><img src="{{ url_for('static', filename='phone.png') }}" width="25%" height="25%"><li class="nav-item">Get user by phone number</li></div>
+                <div class="btn bg-transparent"  onclick="window.location.href='{{ url_for('GetAllGroupsaUserIsaMemberOf') }}';"><img src="{{ url_for('static', filename='memberof.png') }}" width="25%" height="25%"><li class="nav-item">Get all groups a user is a member of</li></div>
+                <div class="btn bg-transparent"  onclick="window.location.href='{{ url_for('GetChangeHistoryOfaGivenGroup') }}';"><img src="{{ url_for('static', filename='report.png') }}" width="25%" height="25%"><li class="nav-item">Get change history of a given group</li></div>
+                <div class="btn bg-transparent"  onclick="window.location.href='{{ url_for('GetChangeHistoryOfaGivenUser') }}';"><img src="{{ url_for('static', filename='change.png') }}" width="25%" height="25%"><li class="nav-item">Get change history of a given user</li></div>
                 <!--<li class="nav-item"><a class="nav-link" aria-disabled="true">AbUt</a></li>-->
             </ul>
         </div>
