@@ -2,4 +2,12 @@
 
 {% block body_content %}
 PullMembersOfAgroup
+<div class="row">
+    <div class="form-group col-md-4">
+        <span id="Label1" class="control-label" style="display:inline"> Name: </span>
+        <input name="TextBox1" type="text" id="TextBox1" class="form-control" style="display:inline">
+        <br>
+        <span style="display:none"><input id="DoUnlockCheckbox" type="checkbox" name="DoUnlockCheckbox"><label for="DoUnlockCheckbox">Just unlock! (Don't put user's password if checked)</label></span>
+    </div>
+</div>
 {% endblock %}
