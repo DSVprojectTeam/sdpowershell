@@ -1,64 +1,53 @@
+}
 function Audit_Group {
-    param(
-        [Parameter(Position=0)]
+    param (
+        [Parameter(Mandatory = $true)]
         [string]$GroupName
     )
 
     try {
-        $ErrorActionPreference = "Stop"
-
-        # Wyszukaj grupę po nazwie (LDAP filter)
+        # Get the group
         $group = Get-QADGroup -LdapFilter "(name=$GroupName)"
+        if (-not $group) {
+            return "Raptor404"
+        }
 
-        if ($group) {
-            # Pobierz członków grupy z dodatkowymi właściwościami
-            $members = Get-QADGroupMember -Identity $group.DN -IncludedProperties mail, c, co, title, company, department, manager, name, DN
+        # Get group members
+        $members = Get-QADGroupMember -Identity $group.DN
 
-            $exportData = foreach ($member in $members) {
-                # Pobierz nazwę managera, jeśli istnieje
-                $managerName = $null
-                if ($member.Manager) {
-                    $managerObj = Get-QADUser -Identity $member.Manager -IncludedProperties displayName
-                    $managerName = $managerObj.DisplayName
-                }
+        # Process member data
+        $result = foreach ($member in $members) {
+            $user = Get-QADUser -Identity $member.DN -IncludeAllProperties
+            if ($null -eq $user) { continue }
 
-                # Przypisz country (co lub c)
-                $country = if ($member.co) { $member.co } elseif ($member.c) { $member.c } else { "" }
-
-                # Sprawdź czy użytkownik jest w OU=Deprovisioned Objects
-                $isDeprovisioned = if ($member.DN -like "*OU=Deprovisioned Objects*") { "yes" } else { "no" }
-
-                [PSCustomObject]@{
-                    Name          = $member.Name
-                    Login         = $member.SamAccountName
-                    Email         = $member.Mail
-                    Country       = $country
-                    Title         = $member.Title
-                    Company       = $member.Company
-                    Department    = $member.Department
-                    Manager       = $managerName
-                    Deprovisioned = $isDeprovisioned
-                }
+            [PSCustomObject]@{
+                Name          = $user.Name
+                Login         = $user.SamAccountName
+                Email         = $user.Email
+                Country       = $user.c
+                Title         = $user.Title
+                Company       = $user.Company
+                Department    = $user.Department
+                Manager       = ($user.Manager -split ',')[0] -replace '^CN='
+                Deprovisioned = if ($user.DN -like "*OU=Deprovisioned Objects*") { "yes" } else { "no" }
             }
-
-            # Zbuduj nazwę pliku CSV
-            $safeName = ($GroupName -replace '[^\w\.-]', '_') + ".csv"
-            $exportData | Export-Csv -Path $safeName -NoTypeInformation -Encoding UTF8 -Delimiter ';'
-
-            Write-Host "Eksportowano do pliku: $safeName"
         }
-        else {
-            Write-Host "Raptor404"
-        }
+
+        # Save result as JSON
+        $jsonPath = "$($GroupName).json"
+        $result | ConvertTo-Json -Depth 4 | ForEach-Object { $_ -replace '\\u0027', "'" } | Set-Content -Path $jsonPath -Encoding UTF8
+
+        return $result
     }
     catch {
-        Write-Host "Raptor404"
+        return "Raptor404"
     }
 }
 
-# === Automatyczne wywołanie, jeśli podano argument ===
+# === Auto-invoke if group name is passed as argument ===
 if ($MyInvocation.InvocationName -ne '.' -and $args.Count -eq 1) {
-    Audit_Group -GroupName $args[0]
+    $result = Audit_Group -GroupName $args[0]
+    Write-Host $result
 }
 
 function Audit_AllGroupsFromCsv {
@@ -67,27 +56,38 @@ function Audit_AllGroupsFromCsv {
         [string]$CsvPath
     )
 
-    # Sprawdzenie istnienia pliku
-    if (-Not (Test-Path -Path $CsvPath)) {
-        Write-Host "Plik nie istnieje: $CsvPath"
-        return
-    }
-
-    # Wczytanie nazw grup z pliku
-    $groupNames = Get-Content -Path $CsvPath | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" }
-
-    if ($groupNames.Count -eq 0) {
-        Write-Host "Brak poprawnych nazw grup w pliku CSV."
-        return
-    }
-
-    # Przetworzenie każdej grupy
-    foreach ($group in $groupNames) {
-        if ($null -ne $group -and $group -ne "") {
-            Write-Host "Przetwarzanie grupy: $group"
-            Audit_Group -GroupName $group
+    try {
+        # Check if file exists
+        if (-Not (Test-Path -Path $CsvPath)) {
+            return ConvertTo-Json -InputObject @{Error = "Raptor404"; Message = "CSV file not found"}
         }
-    }
 
-    Write-Host "Zakonczono przetwarzanie " $groupNames.Count "grup."
+        # Read group names from CSV
+        $groupNames = Get-Content -Path $CsvPath | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" }
+
+        if ($groupNames.Count -eq 0) {
+            return ConvertTo-Json -InputObject @{Error = "Raptor404"; Message = "No valid group names found in CSV"}
+        }
+
+        $allResults = @()
+
+        # Process each group
+        foreach ($group in $groupNames) {
+            Write-Host "Processing group: $group"
+            $result = Audit_Group -GroupName $group
+
+            if ($result -eq "Raptor404") {
+                $allResults += @{GroupName = $group; Status = "Raptor404"; Message = "Error processing the group"}
+            }
+            else {
+                $allResults += @{GroupName = $group; Status = "Success"; Data = $result}
+            }
+        }
+
+        # Convert all results to JSON
+        $allResults | ConvertTo-Json -Depth 4
+    }
+    catch {
+        return ConvertTo-Json -InputObject @{Error = "Raptor404"; Message = "Unexpected error occurred"}
+    }
 }
