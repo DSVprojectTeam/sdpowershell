@@ -10,7 +10,7 @@ function Get-Groupsofuser {
     try {
         $ErrorActionPreference = "Stop"
 
-        # Pobranie wszystkich grup (bezpośrednich i pośrednich), wypisanie nazw
+        # Pobranie wszystkich grup (bezposrednich i posrednich), wypisanie nazw
         $groups = Get-QADMemberOf -Identity $UploadID -Indirect | Select-Object -ExpandProperty SAMAccountName
 
         if ($groups) {
@@ -27,12 +27,12 @@ function Get-Groupsofuser {
     $stopwatch.Stop()
     $result.duration = [math]::Round($stopwatch.Elapsed.TotalSeconds, 3)
 
-    # Zwrócenie wyniku jako JSON
+    # Zwrocenie wyniku jako JSON
     $result | ConvertTo-Json -Depth 2
 }
-# === Automatyczne wywołanie, jeśli podano argument ===
+# === Automatyczne wywolanie, jesli podano argument ===
 if ($MyInvocation.InvocationName -ne '.' -and $args.Count -eq 1) {
     Get-Groupsofuser -UploadID $args[0]
 }
-# Zastąp "user.name" nazwą konta użytkownika (pre2000)
+# Zastap "user.name" nazwa konta uzytkownika (pre2000)
 # Get-UserGroups user.name
