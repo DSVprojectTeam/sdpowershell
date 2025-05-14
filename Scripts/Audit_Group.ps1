@@ -1,4 +1,4 @@
-}
+
 function Audit_Group {
     param (
         [Parameter(Mandatory = $true)]
