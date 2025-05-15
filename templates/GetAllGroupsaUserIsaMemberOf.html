@@ -25,7 +25,10 @@
 {% if username and password and searched_user %}
     <p>Otrzymano dane: {{ username }}, {{ password }}, {{ searched_user }}</p>
 {% endif %}
-
+{% if result %}
+    <h2>Group members:</h2>
+    <p>{{ result }}</p>
+{% endif %}
 <style>
     .form-row {
         margin-bottom: 25px;

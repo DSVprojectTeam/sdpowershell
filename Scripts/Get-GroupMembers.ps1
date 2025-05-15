@@ -21,14 +21,14 @@ function Get-GroupMembers {
             if ($members) {
                 $result = @{ users = $members }
             } else {
-                $result = @{ error = "Raptor404" }
+                $result = @{ error = "1Raptor404" }
             }
         } else {
-            $result = @{ error = "Raptor404" }
+            $result = @{ error = "2Raptor404" }
         }
     }
     catch {
-        $result = @{ error = "Raptor404" }
+        $result = @{ error = "3Raptor404" }
     }
 
     # Zatrzymaj stoper i dodaj czas wykonania

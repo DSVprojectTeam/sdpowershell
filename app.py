@@ -60,15 +60,16 @@ def GetAllGroupsaUserIsaMemberOf():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        user_name = request.form.get("user_name")
-
-        data = get_group_members(user_name)
-
+        searched_user = request.form.get("searched_user")
+        
+        data = get_all_groups_of_user(searched_user)
+        data = "EEE"
+        
         return render_template(
             "GetAllGroupsaUserIsaMemberOf.html",
             username=username,
             password=password,
-            user_name=user_name,
+            searched_user=searched_user,
             result=data,
         )
     return render_template("GetAllGroupsaUserIsaMemberOf.html")
