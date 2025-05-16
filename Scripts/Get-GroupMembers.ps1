@@ -1,7 +1,7 @@
 function Get-GroupMembers {
     param(
         [Parameter(Position=0)]
-        [string]$GroupName # Dokładny cn ldapname grupy 
+        [string]$GroupName # Dokladny cn ldapname grupy 
     )
 
     # Pomiar czasu
@@ -10,11 +10,11 @@ function Get-GroupMembers {
     try {
         $ErrorActionPreference = "Stop"
 
-        # Wyszukaj grupę po nazwie (LDAP filter)
+        # Wyszukaj grupe po nazwie (LDAP filter)
         $group = Get-QADGroup -LdapFilter "(name=$GroupName)"
 
         if ($group) {
-            # Pobierz członków tej grupy i ich SAMAccountName
+            # Pobierz czlonkow tej grupy i ich SAMAccountName
             $members = Get-QADGroupMember -Identity $group.DN |
                        Select-Object -ExpandProperty SAMAccountName
 
@@ -35,12 +35,12 @@ function Get-GroupMembers {
     $stopwatch.Stop()
     $result.duration = [math]::Round($stopwatch.Elapsed.TotalSeconds, 3)
 
-    # Zwróć wynik jako JSON
+    # Zwroc wynik jako JSON
     $result | ConvertTo-Json -Depth 2
 }
-# === Automatyczne wywołanie, jeśli podano argument ===
+# === Automatyczne wywolanie, jesli podano argument ===
 if ($MyInvocation.InvocationName -ne '.' -and $args.Count -eq 1) {
     Get-GroupMembers -GroupName $args[0]
 }
 # Get-GroupMembers "group.name"
-# Cudzysłów jest wymagany, jeśli nazwa grupy zawiera spacje
+# Cudzyslow jest wymagany, jesli nazwa grupy zawiera spacje
