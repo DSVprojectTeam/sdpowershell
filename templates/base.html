@@ -60,6 +60,11 @@
         .main-headerbtn{
             color: white
         }
+        .abut{
+          color: #c6d7ff;
+          text-align: center;
+          position: bottom;
+        }
     </style>
 </head>
 <body>
@@ -76,13 +81,14 @@
                 <div class="btn bg-transparent" onclick="window.location.href='{{ url_for('GetAllGroupsaUserIsaMemberOf') }}';"><img src="{{ url_for('static', filename='memberof.png') }}" width="25%" height="25%"><li class="nav-item">Get all groups a user is a member of</a></li></div>
                 <div class="btn bg-transparent" onclick="window.location.href='{{ url_for('GetChangeHistoryOfaGivenGroup') }}';"><img src="{{ url_for('static', filename='report.png') }}" width="25%" height="25%"><li class="nav-item">Get change history of a given group</a></li></div>
                 <div class="btn bg-transparent" onclick="window.location.href='{{ url_for('GetChangeHistoryOfaGivenUser') }}';"><img src="{{ url_for('static', filename='change.png') }}" width="25%" height="25%"><li class="nav-item">Get change history of a given user</a></li></div>
-                <!--<li class="nav-item"><a class="nav-link" aria-disabled="true">AbUt</a></li>-->
+                <li class="abut">AbUt</li>
             </ul>
         </div>
         <div class="main-content">
             <div class="header">
                 {% include "header.html" %}
             </div>
+            
             <div class="content-wrapper">
                 {% block body_content %}{% endblock %}
             </div>

@@ -25,6 +25,26 @@
 {% if username and password and group_name %}
     <p>Otrzymano dane: {{ username }}, {{ password }}, {{ group_name }}</p>
 {% endif %}
+{% if result %}
+    <table border="1">
+        <thead>
+            <tr>
+                {% for key in result[0].keys() %}
+                    <th>{{ key }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in result %}
+                <tr>
+                    {% for value in row.values() %}
+                        <td>{{ value }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
 
 <style>
     .form-row {
