@@ -26,8 +26,11 @@
     <p>Otrzymano dane: {{ username }}, {{ password }}, {{ searched_user }}</p>
 {% endif %}
 {% if result %}
-    <h2>User's groups:</h2>
-    <p>{{ result }}</p>
+    <ul>
+    {% for group in result['groups'] %}
+        <li>{{ group }}</li>
+    {% endfor %}
+    </ul>
 {% endif %}
 <style>
     .form-row {
