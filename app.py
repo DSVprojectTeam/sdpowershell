@@ -63,7 +63,6 @@ def GetAllGroupsaUserIsaMemberOf():
         searched_user = request.form.get("searched_user")
         
         data = get_all_groups_of_user(searched_user)
-        data = "EEE"
         
         return render_template(
             "GetAllGroupsaUserIsaMemberOf.html",
@@ -185,7 +184,7 @@ def get_all_groups_of_user(user_name):
                 "-ExecutionPolicy",
                 "Bypass",
                 "-File",
-                ".\\Scripts\\Get-AllGroupsOfUser.ps1",
+                ".\\Scripts\\Get-Groupsofuser.ps1",
                 user_name,
             ],
             capture_output=True,
