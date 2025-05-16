@@ -112,6 +112,13 @@ def GetChangeHistoryOfaGivenGroup():
         )
     return render_template("GetChangeHistoryOfaGivenGroup.html")
 
+@app.route('/MassAudit')
+def MassAudit():
+    return render_template('MassAudit.html')
+ 
+@app.route('/GroupAudit')
+def GroupAudit():
+    return render_template('GroupAudit.html')
 
 def get_group_members(group_name):
     try:
@@ -253,7 +260,6 @@ def get_change_history_of_group(group_name):
         print("Nie udało się zdekodować JSON-a.")
         print("Odpowiedź:", result.stdout)
         return None
-
 
 if __name__ == "__main__":
     app.run(debug=True)
