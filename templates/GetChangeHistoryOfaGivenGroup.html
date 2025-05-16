@@ -25,6 +25,10 @@
 {% if username and password and group_name %}
     <p>Otrzymano dane: {{ username }}, {{ password }}, {{ group_name }}</p>
 {% endif %}
+{% if result %}
+    <h2>Group audit:</h2>
+    <p>{{ result }}</p>
+{% endif %}
 
 <style>
     .form-row {

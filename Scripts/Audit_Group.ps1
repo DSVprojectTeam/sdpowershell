@@ -1,4 +1,3 @@
-}
 function Audit_Group {
     param (
         [Parameter(Mandatory = $true)]
@@ -47,7 +46,8 @@ function Audit_Group {
 # === Auto-invoke if group name is passed as argument ===
 if ($MyInvocation.InvocationName -ne '.' -and $args.Count -eq 1) {
     $result = Audit_Group -GroupName $args[0]
-    Write-Host $result
+    $result | ConvertTo-Json -Depth 4
+
 }
 
 function Audit_AllGroupsFromCsv {

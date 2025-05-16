@@ -73,7 +73,7 @@ def GetAllGroupsaUserIsaMemberOf():
         )
     return render_template("GetAllGroupsaUserIsaMemberOf.html")
 
-
+#Awaiting scrip
 @app.route("/GetChangeHistoryOfaGivenUser", methods=["GET", "POST"])
 def GetChangeHistoryOfaGivenUser():
 
@@ -94,7 +94,7 @@ def GetChangeHistoryOfaGivenUser():
     return render_template("GetChangeHistoryOfaGivenUser.html")
 
 
-@app.route("/GetChangeHistoryOfaGivenGroup")
+@app.route("/GetChangeHistoryOfaGivenGroup", methods=["GET", "POST"])
 def GetChangeHistoryOfaGivenGroup():
     if request.method == "POST":
         username = request.form.get("username")
@@ -174,7 +174,6 @@ def get_user_by_number(phone_number):
         print("Odpowiedź:", result.stdout)
         return None
 
-
 def get_all_groups_of_user(user_name):
 
     try:
@@ -206,7 +205,7 @@ def get_all_groups_of_user(user_name):
         print("Odpowiedź:", result.stdout)
         return None
 
-
+#Awaiting script
 def get_change_history_of_user(user_name):
     try:
         result = subprocess.run(
@@ -237,7 +236,6 @@ def get_change_history_of_user(user_name):
         print("Odpowiedź:", result.stdout)
         return None
 
-
 def get_change_history_of_group(group_name):
     try:
         result = subprocess.run(
@@ -246,7 +244,7 @@ def get_change_history_of_group(group_name):
                 "-ExecutionPolicy",
                 "Bypass",
                 "-File",
-                ".\\Scripts\\Get-GroupChangeHistory.ps1",
+                ".\\Scripts\\Audit_Group.ps1",
                 group_name,
             ],
             capture_output=True,
