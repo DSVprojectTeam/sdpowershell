@@ -112,3 +112,9 @@ function Audit_AllGroupsFromCsv {
         return ConvertTo-Json -InputObject @{Error = "Raptor404"; Message = "Unexpected error occurred"}
     }
 }
+# === Auto-invoke if script called with a CSV path ===
+if ($MyInvocation.InvocationName -ne '.' -and $args.Count -eq 1) {
+    $csvArg = $args[0]
+    $auditResult = Audit_AllGroupsFromCsv -CsvPath $csvArg
+    Write-Host $auditResult
+}
