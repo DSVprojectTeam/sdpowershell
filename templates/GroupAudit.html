@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block body_content %}
+<h1>YOUR CREDENTIALS</h1>
+<form action="/GroupAudit():" method="POST">
+    <div class="form-row">
+        <label for="group_name">GROUP NAME:</label>
+        <input type="text" id="group_name" name="group_name">
+    </div>
+
+    <input type="submit" value="SEARCH">
+</form>
+
+<div style="margin-top: 50px;"></div>
+
+{% if result and result['users'] %}
+    <h2>User:</h2>
+    <table>
+        <thead>
+            <tr>
+                {% for key in result['users'][0].keys() %}
+                    <th>{{ key | upper }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in result['users'] %}
+                <tr>
+                    {% for value in user.values() %}
+                        <td>{{ value }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No users</p>
+{% endif %}
+
+<style>
+    .form-row {
+        margin-bottom: 25px;
+    }
+
+    label {
+        display: inline-block;
+        width: 180px;
+    }
+
+    input[type="text"], input[type="password"] {
+        padding: 5px;
+        width: 200px;
+        font-family: inherit;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+
+    table {
+        width: 80%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        border: 1px solid #ccc;
+        padding: 10px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f0f0f0;
+    }
+</style>
+{% endblock %}
