@@ -1,23 +1,10 @@
 {% extends "base.html" %}
 
 {% block body_content %}
-<h1>YOUR CREDENTIALS</h1>
 <form action="/GetUserByPhoneNumber" method="POST">
-    <div class="form-row">
-        <label for="username">USERNAME:</label>
-        <input type="text" id="username" name="username">
-    </div>
-
-    <div class="form-row">
-        <label for="password">PASSWORD:</label>
-        <input type="password" id="password" name="password">
-    </div>
-
-    <div class="form-row">
-        <label for="phone_prefix">PHONE PREFIX:</label>
-        <input type="text" id="phone_prefix" name="phone_prefix">
-    </div>
-
+    
+    <h1>SEARCHED NUMBER</h1>
+    
     <div class="form-row">
         <label for="phone_number">PHONE NUMBER:</label>
         <input type="text" id="phone_number" name="phone_number">
@@ -25,16 +12,15 @@
 
     <input type="submit" value="SEARCH">
     <div id="preloader" style="display: none;">
-        <div class="spinner"></div>
-    </div>
+</div>
 </form>
-
 
 <div style="margin-top: 50px;"></div>
 {% if result %}
     <h2>USER:</h2>
     <p>{{ result['users'] }}</p>
 {% endif %}
+
 <style>
     .form-row {
         margin-bottom: 25px;
@@ -42,7 +28,7 @@
 
     label {
         display: inline-block;
-        width: 120px;
+        width: 180px;
     }
 
     input[type="text"], input[type="password"] {
@@ -56,7 +42,7 @@
         background: #ffffff url(static/loader.gif) no-repeat center center;
         position: fixed;
         top: 0;
-        left: 0;
+        left : 0;
         width: 100vw;
         height: 100vh;
         background-color: rgba(255, 255, 255, 0.8);
@@ -64,11 +50,11 @@
         justify-content: center;
         align-items: center;
         z-index: 1000;
-    }
+}
 </style>
 <script>
-    document.querySelector('form').addEventListener('submit', function () {
-        document.getElementById('preloader').style.display = 'flex';
-    });
+document.querySelector('form').addEventListener('submit', function () {
+    document.getElementById('preloader').style.display = 'flex';
+});
 </script>
 {% endblock %}
