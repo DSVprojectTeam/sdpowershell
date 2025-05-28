@@ -2,7 +2,7 @@
 
 {% block body_content %}
 <h1>YOUR CREDENTIALS</h1>
-<form action="/GroupAudit():" method="POST">
+<form action="/GroupAudit" method="POST">
     <div class="form-row">
         <label for="group_name">GROUP NAME:</label>
         <input type="text" id="group_name" name="group_name">
@@ -12,6 +12,7 @@
 </form>
 
 <div style="margin-top: 50px;"></div>
+
 
 {% if result and result['users'] %}
     <h2>User:</h2>

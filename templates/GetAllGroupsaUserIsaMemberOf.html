@@ -4,8 +4,8 @@
 <h1>YOUR CREDENTIALS</h1>
 <form action="/GetAllGroupsaUserIsaMemberOf" method="POST">
     <div class="form-row">
-        <label for="group_name">USER NAME:</label>
-        <input type="text" id="group_name" name="group_name">
+        <label for="searched_user">USER NAME:</label>
+        <input type="text" id="searched_user" name="searched_user">
     </div>
 
     <input type="submit" value="SEARCH">
@@ -13,27 +13,14 @@
 
 <div style="margin-top: 50px;"></div>
 {% if result and result['groups'] %}
-    <h2>Groups:</h2>
-    <table>
-        <thead>
-            <tr>
-                {% for key in result['groups'][0].keys() %}
-                    <th>{{ key | upper }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in result['groups'] %}
-                <tr>
-                    {% for value in group.values() %}
-                        <td>{{ value }}</td>
-                    {% endfor %}
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <h2>Groups:</h2>
+    <ul>
+        {% for group in result['groups'] %}
+            <li>{{ group }}</li>
+        {% endfor %}
+    </ul>
 {% else %}
-    <p>No groups</p>
+    <p>No groups</p>
 {% endif %}
 
 <style>
