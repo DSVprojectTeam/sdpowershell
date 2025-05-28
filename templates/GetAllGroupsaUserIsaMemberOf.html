@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 
 {% block body_content %}
-<h1>YOUR CREDENTIALS</h1>
-<form action="/GetAllGroupsaUserIsaMemberOf" method="POST">
+<h1></h1>
+<form action="/GetAllGroupsaUserIsaMemberOf" method="POST">    
+    <h1>USER'S GROUPS</h1>
     <div class="form-row">
         <label for="searched_user">USER NAME:</label>
         <input type="text" id="searched_user" name="searched_user">
@@ -13,14 +14,14 @@
 
 <div style="margin-top: 50px;"></div>
 {% if result and result['groups'] %}
-    <h2>Groups:</h2>
-    <ul>
-        {% for group in result['groups'] %}
-            <li>{{ group }}</li>
-        {% endfor %}
-    </ul>
+    <h2>Groups:</h2>
+    <ul>
+        {% for group in result['groups'] %}
+            <li>{{ group }}</li>
+        {% endfor %}
+    </ul>
 {% else %}
-    <p>No groups</p>
+    <p>No groups</p>
 {% endif %}
 
 <style>
