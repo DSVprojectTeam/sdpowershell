@@ -68,11 +68,12 @@ function Get-UserByNumber {
     # Zwroc wynik jako JSON
     $result | ConvertTo-Json -Depth 2
 
-    # === Automatyczne wywolanie, jesli podano argument ===
-    if ($MyInvocation.InvocationName -ne '.' -and $args.Count -eq 1) {
-    Get-UserByNumber -FullNumber $args[0]
-    }
 
 }
 
+# === Automatyczne wywolanie, jesli podano argument ===
+if ($MyInvocation.InvocationName -ne '.' -and $args.Count -eq 1) {
+    Get-UserByNumber -FullNumber $args[0]
+    }
+    
 # Get-UserByNumber "+48123123123"
