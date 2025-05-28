@@ -75,7 +75,8 @@ def GroupAudit():
         )
     # Pass result explicitly as None on GET
     return render_template('GroupAudit.html', result=None)
-    return render_template('GroupAudit.html')
+    
+
 
 def group_audit(group_name):
     try:
@@ -90,7 +91,8 @@ def group_audit(group_name):
             ],
             capture_output=True,
             text=True,
-            timeout=30,
+            encoding='latin1',  
+            timeout=260,
         )
 
         if result.returncode != 0:
