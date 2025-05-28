@@ -2,25 +2,40 @@
 
 {% block body_content %}
 <h1>YOUR CREDENTIALS</h1>
-<form action="/GetAllGroupsaUserIsaMemberOf" method="POST">
+<form action="/GroupAudit" method="POST">
     <div class="form-row">
-        <label for="searched_user">USER NAME:</label>
-        <input type="text" id="searched_user" name="searched_user">
+        <label for="group_name">GROUP NAME:</label>
+        <input type="text" id="group_name" name="group_name">
     </div>
 
     <input type="submit" value="SEARCH">
 </form>
 
 <div style="margin-top: 50px;"></div>
-{% if result and result['groups'] %}
-    <h2>Groups:</h2>
-    <ul>
-        {% for group in result['groups'] %}
-            <li>{{ group }}</li>
-        {% endfor %}
-    </ul>
+
+
+{% if result and result['users'] %}
+    <h2>User:</h2>
+    <table>
+        <thead>
+            <tr>
+                {% for key in result['users'][0].keys() %}
+                    <th>{{ key | upper }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in result['users'] %}
+                <tr>
+                    {% for value in user.values() %}
+                        <td>{{ value }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% else %}
-    <p>No groups</p>
+    <p>No users</p>
 {% endif %}
 
 <style>

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block body_content %}
+    <h2>SELECT CSV FILE</h2>
+
+    <form action="{{ url_for('MassAudit') }}" method="POST" enctype="multipart/form-data">
+        <label for="file">Select CSV file:</label>
+        <input type="file" id="file" name="file" accept=".csv" required>
+        
+        <div style="margin-top: 50px;"></div>
+
+        <button type="submit">SEARCH</button>
+    </form>
+
+    {% if result %}
+        <h3>RESULTS:</h3>
+        <pre>{{ result }}</pre>
+    {% endif %}
+
+{% endblock %}

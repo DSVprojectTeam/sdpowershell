@@ -1,30 +1,24 @@
 {% extends "base.html" %}
 
 {% block body_content %}
-<h1>YOUR CREDENTIALS</h1>
 <form action="/GetUserByPhoneNumber" method="POST">
+    
+    <h1>SEARCHED NUMBER</h1>
+    
     <div class="form-row">
-        <label for="pole1">USERNAME:</label>
-        <input type="text" id="username" name="username" class="input">
-    </div>
-
-    <div class="form-row">
-        <label for="pole2">PASSWORD:</label>
-        <input type="password" id="password" name="password">
-    </div>
-
-    <h1>PHONE NUMBER</h1>
-    <wide-label for="pole1">contact number and phone number:</wide-label>
-    <div class="form-row">
-        <input type="text" id="phone_prefix" name="phone_prefix" class="wide-input">
-        <input type="text" id="phone_number" name="phone_number" class="input">
+        <label for="phone_number">PHONE NUMBER:</label>
+        <input type="text" id="phone_number" name="phone_number">
     </div>
 
     <input type="submit" value="SEARCH">
+    <div id="preloader" style="display: none;">
+</div>
 </form>
 
-{% if username and password and phone_prefix and phone_number %}
-    <p>Otrzymano dane: {{ username }}, {{ password }}, {{ phone_prefix }}, {{phone_number}}</p>
+<div style="margin-top: 50px;"></div>
+{% if result %}
+    <h2>USER:</h2>
+    <p>{{ result['users'] }}</p>
 {% endif %}
 
 <style>
@@ -34,20 +28,7 @@
 
     label {
         display: inline-block;
-        width: 120px;
-    }
-
-    .wide-label{
-        display: inline-block;
-        width: 300px;
-    }
-
-    .wide-input[type="text"] {
-        padding: 5px;
-        width: 50px;
-        font-family: inherit;
-        font-size: 16px;
-        box-sizing: border-box;
+        width: 180px;
     }
 
     input[type="text"], input[type="password"] {
@@ -57,5 +38,23 @@
         font-size: 16px;
         box-sizing: border-box;
     }
+    #preloader {
+        background: #ffffff url(static/loader.gif) no-repeat center center;
+        position: fixed;
+        top: 0;
+        left : 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(255, 255, 255, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+}
 </style>
+<script>
+document.querySelector('form').addEventListener('submit', function () {
+    document.getElementById('preloader').style.display = 'flex';
+});
+</script>
 {% endblock %}
