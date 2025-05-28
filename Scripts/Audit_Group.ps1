@@ -18,7 +18,7 @@ function Audit_Group {
         $result = foreach ($member in $members) {
             switch ($member.Type) {
                 'User' {
-                    $user = Get-QADUser -Identity $member.DN -IncludeAllProperties
+                    $user = Get-QADUser -Identity $member.DN -SizeLimit 0 -IncludeAllProperties
                     if ($null -eq $user) { continue }
 
                     [PSCustomObject]@{
