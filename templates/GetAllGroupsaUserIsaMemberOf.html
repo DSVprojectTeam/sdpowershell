@@ -4,34 +4,38 @@
 <h1>YOUR CREDENTIALS</h1>
 <form action="/GetAllGroupsaUserIsaMemberOf" method="POST">
     <div class="form-row">
-        <label for="pole1">USERNAME:</label>
-        <input type="text" id="username" name="username">
-    </div>
-
-    <div class="form-row">
-        <label for="pole2">PASSWORD:</label>
-        <input type="password" id="password" name="password">
-    </div>
-
-    <h1>SEARCHED USER</h1>
-    <div class="form-row">
-        <label for="pole3">USERNAME:</label>
-        <input type="text" id="searched_user" name="searched_user">
+        <label for="group_name">USER NAME:</label>
+        <input type="text" id="group_name" name="group_name">
     </div>
 
     <input type="submit" value="SEARCH">
 </form>
 
-{% if username and password and searched_user %}
-    <p>Otrzymano dane: {{ username }}, {{ password }}, {{ searched_user }}</p>
+<div style="margin-top: 50px;"></div>
+{% if result and result['groups'] %}
+    <h2>Groups:</h2>
+    <table>
+        <thead>
+            <tr>
+                {% for key in result['groups'][0].keys() %}
+                    <th>{{ key | upper }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in result['groups'] %}
+                <tr>
+                    {% for value in group.values() %}
+                        <td>{{ value }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No groups</p>
 {% endif %}
-{% if result %}
-    <ul>
-    {% for group in result['groups'] %}
-        <li>{{ group }}</li>
-    {% endfor %}
-    </ul>
-{% endif %}
+
 <style>
     .form-row {
         margin-bottom: 25px;
@@ -39,7 +43,7 @@
 
     label {
         display: inline-block;
-        width: 120px;
+        width: 180px;
     }
 
     input[type="text"], input[type="password"] {
@@ -48,6 +52,22 @@
         font-family: inherit;
         font-size: 16px;
         box-sizing: border-box;
+    }
+
+    table {
+        width: 80%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        border: 1px solid #ccc;
+        padding: 10px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f0f0f0;
     }
 </style>
 {% endblock %}
