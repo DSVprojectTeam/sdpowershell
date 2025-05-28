@@ -1,20 +1,89 @@
 {% extends "base.html" %}
 
 {% block body_content %}
-    <h2>SELECT CSV FILE</h2>
+<h1>MASS GROUP AUDIT</h1>
 
-    <form action="{{ url_for('MassAudit') }}" method="POST" enctype="multipart/form-data">
-        <label for="file">Select CSV file:</label>
+<form action="{{ url_for('MassAudit') }}" method="POST" enctype="multipart/form-data">
+    <div class="form-row">
+        <label for="file">CSV FILE:</label>
         <input type="file" id="file" name="file" accept=".csv" required>
-        
-        <div style="margin-top: 50px;"></div>
+    </div>
 
-        <button type="submit">SEARCH</button>
-    </form>
+    <input type="submit" value="SEARCH">
+</form>
 
-    {% if result %}
-        <h3>RESULTS:</h3>
-        <pre>{{ result }}</pre>
-    {% endif %}
+<div style="margin-top: 50px;"></div>
 
+{% if result %}
+    {% for group in result %}
+        {% for group_name, data in group.items() %}
+            <h2>Group: {{ group_name }}</h2>
+
+            {% if data and data['users'] %}
+                <table>
+                    <thead>
+                        <tr>
+                            {% for key in data['users'][0].keys() %}
+                                <th>{{ key | upper }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in data['users'] %}
+                            <tr>
+                                {% for value in user.values() %}
+                                    <td>{{ value }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No users</p>
+            {% endif %}
+
+            <div style="margin-bottom: 40px;"></div>
+        {% endfor %}
+    {% endfor %}
+{% endif %}
+
+<style>
+    .form-row {
+        margin-bottom: 25px;
+    }
+
+    label {
+        display: inline-block;
+        width: 180px;
+    }
+
+    input[type="file"] {
+        padding: 5px;
+        width: 300px;
+        font-family: inherit;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+
+    input[type="submit"] {
+        padding: 8px 16px;
+        font-size: 16px;
+    }
+
+    table {
+        width: 90%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        border: 1px solid #ccc;
+        padding: 10px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f0f0f0;
+    }
+</style>
 {% endblock %}

@@ -2,6 +2,9 @@ from flask import Flask, render_template, url_for, request
 import subprocess
 import json
 import time
+import os
+import tempfile
+import csv
 
 #STATIC VARIABLE
 
@@ -66,7 +69,6 @@ def GroupAudit():
         group_name = request.form.get("group_name")
         
         data = group_audit(group_name)
-        print("Data sent to template:", data)
         
         return render_template(
             "GroupAudit.html",
@@ -75,7 +77,32 @@ def GroupAudit():
         )
     # Pass result explicitly as None on GET
     return render_template('GroupAudit.html', result=None)
-    
+
+@app.route('/MassAudit', methods=["GET", "POST"])
+def MassAudit():
+    if request.method == "POST":
+        uploaded_file = request.files.get('file')
+        if not uploaded_file:
+            return render_template('MassAudit.html', result=None)
+
+        # Save file to temp location
+        temp_dir = tempfile.gettempdir()
+        temp_path = os.path.join(temp_dir, uploaded_file.filename)
+        uploaded_file.save(temp_path)
+
+        results = []
+        with open(temp_path, newline='', encoding='utf-8') as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                if row:  # skip empty lines
+                    group_name = row[0].strip()
+                    audit_result = group_audit(group_name)
+                    results.append({group_name: audit_result})
+
+        return render_template("MassAudit.html", file=uploaded_file.filename, result=results)
+
+    return render_template('MassAudit.html', result=None)
+
 
 
 def group_audit(group_name):
@@ -94,15 +121,12 @@ def group_audit(group_name):
             encoding='latin1',  
             timeout=260,
         )
-
         if result.returncode != 0:
             print(f"Error {result.stderr}")
             return None
         users_data = json.loads(result.stdout)
         print(users_data)
         return {"users": users_data}
-
-
     except subprocess.TimeoutExpired:
         print("Skrypt przekroczył limit czasu.")
         return None
