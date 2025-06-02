@@ -10,6 +10,8 @@
     </div>
 
     <input type="submit" value="SEARCH">
+    <div id="preloader" style="display: none;">
+</div>
 </form>
 
 <div style="margin-top: 50px;"></div>
@@ -57,5 +59,24 @@
     th {
         background-color: #f0f0f0;
     }
+
+    #preloader {
+        background: #ffffff url("{{ url_for('static', filename='loader.gif') }}") no-repeat center center;
+        position: fixed;
+        top: 0;
+        left : 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(255, 255, 255, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
 </style>
+<script>
+document.querySelector('form').addEventListener('submit', function () {
+    document.getElementById('preloader').style.display = 'flex';
+});
+</script>
 {% endblock %}
