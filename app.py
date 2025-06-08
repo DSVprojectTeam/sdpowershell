@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request
+from flask import Flask, render_template, url_for, request, send_file
 import subprocess
 import json
 import time
@@ -6,9 +6,7 @@ import os
 import tempfile
 import csv
 
-#STATIC VARIABLE
 
-#RUN
 app = Flask(__name__)
 
 @app.route('/')
@@ -30,6 +28,37 @@ def PullMembersOfAgroup():
         )
     return render_template("PullMembersOfAgroup.html")
 
+@app.route("/download_group_members", methods=["POST"])
+def download_group_members():
+    data_json = request.form.get("data")
+    group_name = request.form.get("group_name", "group")
+    if not data_json:
+        return "No data to download.", 400
+
+    data = json.loads(data_json)
+    # If data is a dict with 'users', extract the list
+    if isinstance(data, dict) and "users" in data:
+        users = data["users"]
+    else:
+        users = data
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Member"])
+    for user in users:
+        writer.writerow([user])
+    output.seek(0)
+
+    # Sanitize group_name for file name
+    safe_group_name = "".join(c for c in group_name if c.isalnum() or c in (' ', '_', '-')).rstrip()
+    filename = f"{safe_group_name}_members.csv" if safe_group_name else "group_members.csv"
+
+    return send_file(
+        io.BytesIO(output.getvalue().encode()),
+        mimetype="text/csv",
+        as_attachment=True,
+        download_name=filename
+    )
 
 @app.route('/GetUserByPhoneNumber', methods=['GET', 'POST'])
 def GetUserByPhoneNumber():
@@ -75,7 +104,6 @@ def GroupAudit():
             group_name=group_name,
             result=data,
         )
-    # Pass result explicitly as None on GET
     return render_template('GroupAudit.html', result=None)
 
 @app.route('/MassAudit', methods=["GET", "POST"])

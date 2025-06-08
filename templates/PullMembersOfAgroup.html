@@ -14,12 +14,17 @@
     <div id="preloader" style="display: none;"></div>
 </form>
 
-{% if username and password and group_name %}
-    <p>Otrzymano dane: {{ username }}, {{ password }}, {{ group_name }}</p>
+{% if group_name %}
+    <p>Showing members of the {{ group_name }} group</p>
 {% endif %}
 {% if result %}
+    <form action="{{ url_for('download_group_members') }}" method="post">
+        <input type="hidden" name="data" value='{{ result|tojson|safe }}'>
+        <input type="hidden" name="group_name" value="{{ group_name }}">
+        <button type="submit">Download as CSV</button>
+    </form>
     <ul>
-    {% for user in result['users'] %}
+    {% for user in result %}
         <li>{{ user }}</li>
     {% endfor %}
     </ul>
