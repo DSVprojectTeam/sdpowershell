@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="preload" src="{{ url_for('static', filename='members.png') }}" as="image" />
     <style>
         body, html {
             height: 100%;
@@ -21,12 +22,14 @@
             font-size: 20px;
             font-weight: bold;
             flex: 20px 1px 300px;
+            position: absolute;
+            width: 100%;
+            top: 0;
         }
         .sidebar {
             flex: 0 0 310px; /* Stała szerokość */
             background-color: #c4d5e7;
-            padding-top: 20px;
-            
+            padding-top: 70px;
             text-align: center;
             font-size: 13px;
             font-family: Arial;
@@ -43,22 +46,30 @@
             color: #adadad;
         }
         .main-content {
+                        padding-top: 70px;
             flex: 1 1 auto;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
-        .header, .footer {
+        .header {
             background-color: #ffffff;
             padding: 15px;
             text-align: center;
         }
         .content-wrapper {
+
             flex-grow: 1;
             padding: 20px;
         }
         .main-headerbtn{
             color: white
+        }
+        .footer {
+         background-color: transparent;
+            text-align: center;
+            bottom: 0;
+            position: sticky;
         }
         .abut{
           color: #c6d7ff;
@@ -76,11 +87,11 @@
         <div class="sidebar">
             <h1><b>Available Tasks</b></h1>
             <ul class="nav flex-column">
-                <div class="btn bg-transparent" onclick="window.location.href='{{ url_for('PullMembersOfAgroup') }}';"><img src="{{ url_for('static', filename='members.png') }}" width="25%" height="25%"><li class="nav-item">Pull members of a group</a></li></div>
-                <div class="btn bg-transparent" onclick="window.location.href='{{ url_for('GetUserByPhoneNumber') }}';"><img src="{{ url_for('static', filename='phone.png') }}" width="25%" height="25%"><li class="nav-item">Get user by phone number</a></li></div>
-                <div class="btn bg-transparent" onclick="window.location.href='{{ url_for('GetAllGroupsaUserIsaMemberOf') }}';"><img src="{{ url_for('static', filename='memberof.png') }}" width="25%" height="25%"><li class="nav-item">Get all groups a user is a member of</a></li></div>
-                <div class="btn bg-transparent" onclick="window.location.href='{{ url_for('GroupAudit') }}';"><img src="{{ url_for('static', filename='members.png') }}" width="25%" height="25%"><li class="nav-item">Group audit</a></li></div>
-                <div class="btn bg-transparent" onclick="window.location.href='{{ url_for('MassAudit') }}';"><img src="{{ url_for('static', filename='members.png') }}" width="25%" height="25%"><li class="nav-item">Mass audit</a></li></div>
+                <div class="btn bg-transparent" onclick="window.location.href='{{ url_for('PullMembersOfAgroup') }}';"><img src="{{ url_for('static', filename='members.png') }}" width="25%" height="25%"><li class="nav-item">Pull members of a group</li></div>
+                <div class="btn bg-transparent" onclick="window.location.href='{{ url_for('GetUserByPhoneNumber') }}';"><img src="{{ url_for('static', filename='phone.png') }}" width="25%" height="25%"><li class="nav-item">Get user by phone number</li></div>
+                <div class="btn bg-transparent" onclick="window.location.href='{{ url_for('GetAllGroupsaUserIsaMemberOf') }}';"><img src="{{ url_for('static', filename='memberof.png') }}" width="25%" height="25%"><li class="nav-item">Get all groups a user is a member of</li></div>
+                <div class="btn bg-transparent" onclick="window.location.href='{{ url_for('GroupAudit') }}';"><img src="{{ url_for('static', filename='members.png') }}" width="25%" height="25%"><li class="nav-item">Group audit</li></div>
+                <div class="btn bg-transparent" onclick="window.location.href='{{ url_for('MassAudit') }}';"><img src="{{ url_for('static', filename='members.png') }}" width="25%" height="25%"><li class="nav-item">Mass audit</li></div>
                 <li class="abut">AbUt</li>
             </ul>
         </div>
@@ -88,11 +99,10 @@
             <div class="header">
                 {% include "header.html" %}
             </div>
-            
-            <div class="content-wrapper">
+            <div class="content-wrapper" >
                 {% block body_content %}{% endblock %}
             </div>
-            <div class="footer">
+            <div class="footer" >
                 {% include "footer.html" %}
             </div>
         </div>
