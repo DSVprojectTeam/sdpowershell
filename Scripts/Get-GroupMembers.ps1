@@ -10,13 +10,16 @@ function Get-GroupMembers {
     try {
         $ErrorActionPreference = "Stop"
 
-        # Wyszukaj grupe po nazwie (LDAP filter)
-        $group = Get-QADGroup -LdapFilter "(name=$GroupName)"
+        # Spróbuj pobrać grupę po DN
+        $group = Get-QADGroup -Identity $GroupName -ErrorAction SilentlyContinue 
+
+        # Jeśli nie znaleziono, spróbuj po CN
+        if (-not $group) {
+            $group = Get-QADGroup -LdapFilter "(cn=$GroupName)" -ErrorAction SilentlyContinue 
+        }
 
         if ($group) {
-            # Pobierz czlonkow tej grupy i ich SAMAccountName
-            $members = Get-QADGroupMember -Identity $group.DN |
-                       Select-Object -ExpandProperty SAMAccountName
+            $members = Get-QADGroupMember -SizeLimit 0 -Identity $group.DN | Select-object -ExpandProperty Name
 
             if ($members) {
                 $result = @{ users = $members }
