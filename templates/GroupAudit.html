@@ -7,48 +7,91 @@
         <label for="group_name">GROUP NAME:</label>
         <input type="text" id="group_name" name="group_name">
     </div>
-
     <input type="submit" value="SEARCH">
-    <div id="preloader" style="display: none;">
-</div>
+    <div id="preloader" style="display: none;"></div>
 </form>
 
-<div style="margin-top: 50px;"></div>
+<div style="margin-top: 30px;"></div>
 
 {% if result and result['users'] %}
-    <h2>User:</h2>
-    <table>
-        <thead>
-            <tr>
-                {% for key in result['users'][0].keys() %}
-                    <th>{{ key | upper }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in result['users'] %}
+    <div style="margin-top:30px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+            <span style="font-weight:bold;">Results</span>
+            <button type="button" onclick="copyTable()">Copy Table</button>
+            <button type="button" onclick="downloadxlsx()">Download xlsx</button>
+        </div>
+        <table id="resultsTable" style="width:100%;max-width:900px;border-collapse:collapse;">
+            <thead>
                 <tr>
-                    {% for value in user.values() %}
-                        <td>{{ value }}</td>
+                    {% for key in result['users'][0].keys() %}
+                        <th style="border:1px solid #ccc;padding:8px;background:#f0f0f0;">{{ key|upper }}</th>
                     {% endfor %}
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% else %}
-    <p>No users</p>
+            </thead>
+            <tbody>
+                {% for user in result['users'] %}
+                    <tr>
+                        {% for value in user.values() %}
+                            <td style="border:1px solid #ccc;padding:8px;">{{ value }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script>
+        function copyTable() {
+            const table = document.getElementById('resultsTable');
+            let range, sel;
+            if (document.createRange && window.getSelection) {
+                range = document.createRange();
+                sel = window.getSelection();
+                sel.removeAllRanges();
+                range.selectNodeContents(table);
+                sel.addRange(range);
+                document.execCommand("copy");
+                sel.removeAllRanges();
+                alert("Table copied to clipboard!");
+            }
+        }
+
+        function downloadxlsx() {
+            const table = document.getElementById('resultsTable');
+            let csv = [];
+            // Get headers
+            const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.replace(/;/g, ' '));
+            csv.push(headers.join(';'));
+            // Get rows
+            table.querySelectorAll('tbody tr').forEach(row => {
+                const cells = Array.from(row.querySelectorAll('td')).map(td => td.innerText.replace(/;/g, ' '));
+                csv.push(cells.join(';'));
+            });
+            // Download as CSV with semicolon separator
+            const blob = new Blob([csv.join('\r\n')], { type: 'text/csv' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'results_table.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+{% endif %}
+
+{% if result and result['users'] and group_name %}
+    <button type="button" onclick="window.location.href='/download_group_audit_excel/{{ group_name }}'">
+        Download Excel
+    </button>
 {% endif %}
 
 <style>
     .form-row {
         margin-bottom: 25px;
     }
-
     label {
         display: inline-block;
         width: 180px;
     }
-
     input[type="text"], input[type="password"] {
         padding: 5px;
         width: 200px;
@@ -56,28 +99,11 @@
         font-size: 16px;
         box-sizing: border-box;
     }
-
-    table {
-        width: 80%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
-
-    th, td {
-        border: 1px solid #ccc;
-        padding: 10px;
-        text-align: left;
-    }
-
-    th {
-        background-color: #f0f0f0;
-    }
-
     #preloader {
         background: #ffffff url("{{ url_for('static', filename='loader.gif') }}") no-repeat center center;
         position: fixed;
         top: 0;
-        left : 0;
+        left: 0;
         width: 100vw;
         height: 100vh;
         background-color: rgba(255, 255, 255, 0.8);
