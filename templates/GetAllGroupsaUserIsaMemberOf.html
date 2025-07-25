@@ -1,41 +1,81 @@
 {% extends "base.html" %}
 
 {% block body_content %}
-<h1></h1>
+<h1>USER'S GROUPS</h1>
 <form action="/GetAllGroupsaUserIsaMemberOf" method="POST">    
-    <h1>USER'S GROUPS</h1>
     <div class="form-row">
         <label for="searched_user">USER NAME:</label>
         <input type="text" id="searched_user" name="searched_user">
     </div>
-
     <input type="submit" value="SEARCH">
-    <div id="preloader" style="display: none;">
-</div>
+    <div id="preloader" style="display: none;"></div>
 </form>
 
-<div style="margin-top: 50px;"></div>
 {% if result and result['groups'] %}
-    <h2>Groups:</h2>
-    <ul>
-        {% for group in result['groups'] %}
-            <li>{{ group }}</li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No groups</p>
+    <div style="margin-top:30px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+            <span style="font-weight:bold;">Results</span>
+            <button type="button" onclick="sortResults('asc')">Sort A-Z</button>
+            <button type="button" onclick="sortResults('desc')">Sort Z-A</button>
+            <button type="button" onclick="copyResults()">Copy</button>
+            <button type="button" onclick="downloadCSV()">Download CSV</button>
+        </div>
+        <textarea id="resultsBox" readonly style="width:100%;max-width:900px;height:40vh;resize:none;box-sizing:border-box;">
+{% for group in result['groups'] %}
+{{ group }}
+{% endfor %}
+        </textarea>
+    </div>
+    <script>
+        function sortResults(order) {
+            const textarea = document.getElementById('resultsBox');
+            let lines = textarea.value.split('\n').filter(line => line.trim() !== '');
+            lines.sort((a, b) => {
+                if (order === 'asc') return a.localeCompare(b);
+                else return b.localeCompare(a);
+            });
+            textarea.value = lines.join('\n');
+        }
+
+        function copyResults() {
+            const textarea = document.getElementById('resultsBox');
+            textarea.select();
+            document.execCommand('copy');
+        }
+
+        function downloadCSV() {
+            const textarea = document.getElementById('resultsBox');
+            let lines = textarea.value.split('\n').filter(line => line.trim() !== '');
+            let csvContent = lines.map(line => `"${line.replace(/"/g, '""')}"`).join('\r\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'user_groups.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function fitResultsBox() {
+            const box = document.getElementById('resultsBox');
+            if (box) {
+                box.style.height = Math.round(window.innerHeight * 0.4) + 'px';
+                box.style.width = Math.min(Math.round(window.innerWidth * 0.98), 900) + 'px';
+            }
+        }
+        window.addEventListener('resize', fitResultsBox);
+        window.addEventListener('DOMContentLoaded', fitResultsBox);
+    </script>
 {% endif %}
 
 <style>
     .form-row {
         margin-bottom: 25px;
     }
-
     label {
         display: inline-block;
         width: 180px;
     }
-
     input[type="text"], input[type="password"] {
         padding: 5px;
         width: 200px;
@@ -43,28 +83,11 @@
         font-size: 16px;
         box-sizing: border-box;
     }
-
-    table {
-        width: 80%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
-
-    th, td {
-        border: 1px solid #ccc;
-        padding: 10px;
-        text-align: left;
-    }
-
-    th {
-        background-color: #f0f0f0;
-    }
-
     #preloader {
         background: #ffffff url("{{ url_for('static', filename='loader.gif') }}") no-repeat center center;
         position: fixed;
         top: 0;
-        left : 0;
+        left: 0;
         width: 100vw;
         height: 100vh;
         background-color: rgba(255, 255, 255, 0.8);
