@@ -1,10 +1,12 @@
-from flask import Flask, render_template, url_for, request
+from flask import Flask, render_template, url_for, request, send_file
 import subprocess
 import json
 import time
 import os
 import tempfile
 import csv
+import io
+from openpyxl import Workbook
 
 #STATIC VARIABLE
 
@@ -276,6 +278,31 @@ def get_change_history_of_group(group_name):
         print("Nie udało się zdekodować JSON-a.")
         print("Odpowiedź:", result.stdout)
         return None
+
+@app.route('/download_group_audit_excel/<group_name>')
+def download_group_audit_excel(group_name):
+    data = group_audit(group_name)
+    users = data.get('users', []) if data else []
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Group Audit"
+
+    # Write headers
+    if users:
+        headers = list(users[0].keys())
+        ws.append(headers)
+        # Write rows
+        for user in users:
+            ws.append([user.get(h, "") for h in headers])
+
+    # Save to bytes
+    file_stream = io.BytesIO()
+    wb.save(file_stream)
+    file_stream.seek(0)
+
+    filename = f"{group_name}_audit.xlsx"
+    return send_file(file_stream, as_attachment=True, download_name=filename, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
 if __name__ == "__main__":
     app.run(debug=True)
