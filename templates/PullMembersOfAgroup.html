@@ -1,40 +1,78 @@
 {% extends "base.html" %}
 
 {% block body_content %}
-
 <form action="/PullMembersOfAgroup" method="POST">
-
     <h1>SEARCHED GROUP</h1>
     <div class="form-row">
         <label for="pole3">GROUP NAME:</label>
         <input type="text" id="group_name" name="group_name">
     </div>
-
     <input type="submit" value="SEARCH">
     <div id="preloader" style="display: none;"></div>
 </form>
 
-{% if username and password and group_name %}
-    <p>Otrzymano dane: {{ username }}, {{ password }}, {{ group_name }}</p>
-{% endif %}
-{% if result %}
-    <ul>
-    {% for user in result['users'] %}
-        <li>{{ user }}</li>
-    {% endfor %}
-    </ul>
+{% if result and result['users'] %}
+    <div style="margin-top:30px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+            <span style="font-weight:bold;">Results</span>
+            <button type="button" onclick="sortResults('asc')">Sort A-Z</button>
+            <button type="button" onclick="sortResults('desc')">Sort Z-A</button>
+            <button type="button" onclick="downloadResults()">Download</button>
+            <button type="button" onclick="copyResults()">Copy</button>
+        </div>
+        <textarea id="resultsBox" readonly style="width:100%;max-width:900px;height:40vh;resize:none;box-sizing:border-box;">
+{% for user in result['users'] %}
+{{ user }}
+{% endfor %}
+        </textarea>
+    </div>
+    <script>
+        function sortResults(order) {
+            const textarea = document.getElementById('resultsBox');
+            let lines = textarea.value.split('\n').filter(line => line.trim() !== '');
+            lines.sort((a, b) => {
+                if (order === 'asc') return a.localeCompare(b);
+                else return b.localeCompare(a);
+            });
+            textarea.value = lines.join('\n');
+        }
+        function fitResultsBox() {
+            const box = document.getElementById('resultsBox');
+            if (box) {
+                box.style.height = Math.round(window.innerHeight * 0.4) + 'px';
+                box.style.width = Math.min(Math.round(window.innerWidth * 0.98), 900) + 'px';
+            }
+        }
+        window.addEventListener('resize', fitResultsBox);
+        window.addEventListener('DOMContentLoaded', fitResultsBox);
+
+        function downloadResults() {
+            const textarea = document.getElementById('resultsBox');
+            const blob = new Blob([textarea.value], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'results.txt';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function copyResults() {
+            const textarea = document.getElementById('resultsBox');
+            textarea.select();
+            document.execCommand('copy');
+        }
+    </script>
 {% endif %}
 
 <style>
     .form-row {
         margin-bottom: 25px;
     }
-
     label {
         display: inline-block;
         width: 180px;
     }
-
     input[type="text"], input[type="password"] {
         padding: 5px;
         width: 200px;
@@ -42,7 +80,6 @@
         font-size: 16px;
         box-sizing: border-box;
     }
-
     #preloader {
         background: #ffffff url("{{ url_for('static', filename='loader.gif') }}") no-repeat center center;
         position: fixed;
