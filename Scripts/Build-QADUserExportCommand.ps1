@@ -28,4 +28,10 @@ Get-QADUser -LdapFilter "(co=$Country)" -IncludeAllProperties -SizeLimit 0 |
         return @{ error = "Raptor404"; reason = $_.Exception.Message } | ConvertTo-Json
     }
     #Build-QADUserExportCommand "Egypt" employeeId, sn
+
+}
+# === Auto-invoke if argument passed ===
+if ($MyInvocation.InvocationName -ne '.' -and $args.Count -eq 1) {
+    $result = Build-QADUserExportCommand -UserIdentifier $args[0]
+    Write-Host $result
 }
