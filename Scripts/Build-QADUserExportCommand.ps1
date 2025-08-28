@@ -1,23 +1,41 @@
 function Build-QADUserExportCommand {
     param(
         [Parameter(Mandatory = $true)]
-        [string]$Country,   # Example: Egypt
+        [string]$Country,
 
-        [Parameter(Mandatory = $true)]
-        [string[]]$Properties  # Example: employeeID, SamAccountName, UserPrincipalName
+        [switch]$GivenName,
+        [switch]$Surname,
+        [switch]$Mail,
+        [switch]$EmployeeID,
+        [switch]$Username,
+        [switch]$Title,
+        [switch]$Department
     )
 
     try {
         $ErrorActionPreference = "Stop"
 
-        # Join properties into a string
-        $propertiesList = $Properties -join ", "
+        # Collect properties based on switches
+        $properties = @()
+        if ($GivenName)  { $properties += "GivenName" }
+        if ($Surname)    { $properties += "sn" }
+        if ($Mail)       { $properties += "mail" }
+        if ($EmployeeID) { $properties += "employeeID" }
+        if ($Username)   { $properties += "SamAccountName" }
+        if ($Title)      { $properties += "Title" }
+        if ($Department) { $properties += "Department" }
+
+        if ($properties.Count -eq 0) {
+            return "Raptor404: No properties selected."
+        }
+
+        $propertiesList = $properties -join ", "
 
         # Build one-liner
         $command = @"
 Get-QADUser -LdapFilter "(co=$Country)" -IncludeAllProperties -SizeLimit 0 |
     Select-Object $propertiesList |
-    Export-Csv -Path ".\$($Country).csv" -Encoding UTF8 -NoTypeInformation -Delimiter ";"
+    Export-Csv -Path ".\$($Country).csv" -Encoding UTF8 -NoTypeInformation
 "@
 
         Write-Host "`n=== COPY & PASTE ONE-LINER ===`n"
@@ -27,8 +45,6 @@ Get-QADUser -LdapFilter "(co=$Country)" -IncludeAllProperties -SizeLimit 0 |
     catch {
         return @{ error = "Raptor404"; reason = $_.Exception.Message } | ConvertTo-Json
     }
-    #Build-QADUserExportCommand "Egypt" employeeId, sn
-
 }
 # === Auto-invoke if argument passed ===
 if ($MyInvocation.InvocationName -ne '.' -and $args.Count -eq 1) {
