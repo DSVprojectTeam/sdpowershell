@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block body_content %}
+<h1>GET USER PHONE NUMBERS</h1>
+
+<form method="POST">
+    <div class="form-row">
+        <label for="ad_username">ADM LOGIN:</label>
+        <input type="text" id="ad_username" name="ad_username" required>
+    </div>
+
+    <div class="form-row">
+        <label for="ad_password">ADM PASSWORD:</label>
+        <input type="password" id="ad_password" name="ad_password" required>
+    </div>
+
+    <div class="form-row">
+        <label for="searched_login">SEARCHED USERNAME:</label>
+        <input type="text" id="searched_login" name="searched_login" required>
+    </div>
+
+    <input type="submit" value="SEARCH">
+    <div id="preloader" style="display: none;"></div>
+</form>
+
+{% if searched_login and result %}
+    <h2>Results for: {{ searched_login }}</h2>
+    <ul>
+        {% for key, value in result.items() %}
+            <li><strong>{{ key }}:</strong> {{ value }}</li>
+        {% endfor %}
+    </ul>
+{% elif searched_login %}
+    <p>No data found for user <strong>{{ searched_login }}</strong>.</p>
+{% endif %}
+
+<style>
+    .form-row {
+        margin-bottom: 25px;
+    }
+
+    label {
+        display: inline-block;
+        width: 180px;
+    }
+
+    input[type="text"], input[type="password"] {
+        padding: 5px;
+        width: 250px;
+        font-family: inherit;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+
+    #preloader {
+        background: #ffffff url("{{ url_for('static', filename='loader.gif') }}") no-repeat center center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(255, 255, 255, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+</style>
+
+<script>
+document.querySelector('form').addEventListener('submit', function () {
+    document.getElementById('preloader').style.display = 'flex';
+});
+</script>
+{% endblock %}
