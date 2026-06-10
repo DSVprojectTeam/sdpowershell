@@ -1,14 +1,13 @@
 from flask import Flask, render_template, url_for, request
-import subprocess
+from helpers import get_all_groups_of_user , get_change_history_of_group , get_change_history_of_user , get_group_members , get_user_by_number , get_user_number_by_login
 import json
-import time
 import os
 import tempfile
 import csv
-import shlex
+from flask import request, render_template, send_file
+
 
 #STATIC VARIABLE
-
 #RUN
 app = Flask(__name__)
 
@@ -16,7 +15,7 @@ app = Flask(__name__)
 def index():
     return render_template("index.html")
 
-
+#======================GET_GROUP_MEMBERS=========================================
 @app.route("/PullMembersOfAgroup", methods=["GET", "POST"])
 def PullMembersOfAgroup():
     if request.method == "POST":
@@ -24,14 +23,32 @@ def PullMembersOfAgroup():
 
         data = get_group_members(group_name)
 
+        final_result = {}
+
+        # Safely handle the data returned from PowerShell
+        if isinstance(data, dict):
+            # If data is already a dictionary, use it directly
+            final_result = data
+        elif isinstance(data, str) and data.strip():
+            # If data is a string, try to parse it as JSON
+            try:
+                final_result = json.loads(data)
+            except Exception as e:
+                final_result = {"Error": f"Unable to parse data: {data}"}
+        else:
+            # If data is None or empty string
+            final_result = {"Error": "Script did not return any data."}
+
+
         return render_template(
             "PullMembersOfAgroup.html",
             group_name=group_name,
-            result=data,
+            result=final_result,
         )
     return render_template("PullMembersOfAgroup.html")
 
 
+#==========================FIND_USER_BY_PHONE=============================================
 @app.route('/GetUserByPhoneNumber', methods=['GET', 'POST'])
 def GetUserByPhoneNumber():
 
@@ -64,6 +81,8 @@ def GetAllGroupsaUserIsaMemberOf():
     return render_template("GetAllGroupsaUserIsaMemberOf.html")
 
 
+#===============================Group_AUDIT====================================
+
 @app.route('/GroupAudit', methods=["GET", "POST"])
 def GroupAudit():
     if request.method == "POST":
@@ -78,6 +97,10 @@ def GroupAudit():
         )
     # Pass result explicitly as None on GET
     return render_template('GroupAudit.html', result=None)
+
+
+#===========================MASS_GROUP_AUDIT=================================================
+
 
 @app.route('/MassAudit', methods=["GET", "POST"])
 def MassAudit():
@@ -104,235 +127,58 @@ def MassAudit():
 
     return render_template('MassAudit.html', result=None)
 
+
+#====================================FIND_USER_PHONE_NUMBER============================================
+
 @app.route('/GetUserNumberByLogin', methods=['GET', 'POST'])
 def GetUserNumberByLogin():
+
     if request.method == 'POST':
-        ad_username = request.form.get('ad_username')
-        ad_password = request.form.get('ad_password')
         searched_login = request.form.get('searched_login')
 
-        if not ad_username or not ad_password or not searched_login:
-            return render_template(
-                'GetUserNumberByLogin.html',
-                searched_login=searched_login,
-                result="Brak wymaganych danych."
-            )
+        # Execute PowerShell script via helper function
+        data = get_user_number_by_login(searched_login )
 
-        data = get_user_number_by_login(searched_login, ad_username, ad_password)
+        final_result = {}
 
+        # Safely handle the data returned from PowerShell
+        if isinstance(data, dict):
+            # If data is already a dictionary, use it directly
+            final_result = data
+        elif isinstance(data, str) and data.strip():
+            # If data is a string, try to parse it as JSON
+            try:
+                final_result = json.loads(data)
+            except Exception as e:
+                final_result = {"Error": f"Unable to parse data: {data}"}
+        else:
+            # If data is None or empty string
+            final_result = {"Error": "Script did not return any data."}
+
+        # Return the results for POST request
         return render_template(
             'GetUserNumberByLogin.html',
             searched_login=searched_login,
-            result=data if data else "Necessary data is missing or the issue has occured."
-        )
-    return render_template('GetUserNumberByLogin.html', searched_login=None, result=None)
-
-def get_user_number_by_login(login, ad_username, ad_password):
-    try:
-        prefix = "DSV\\"
-        prefixed_ad_username = prefix + ad_username
-        print(prefixed_ad_username)
-        result = subprocess.run(
-            [
-                "powershell",
-                "-ExecutionPolicy", "Bypass",
-                "-File", ".\\Scripts\\Get-UsersPhoneNumber.ps1",
-                "-SAMAccountName", login,
-                "-ADUsername", prefixed_ad_username,
-                "-ADPassword", ad_password
-            ],
-            capture_output=True,
-            text=True,
-            timeout=30,
+            result=final_result
         )
 
-        if result.returncode != 0:
-            print(f"Error {result.stderr}")
-            return None
+    # ---------------------------------------------------------
+    # Handle GET request (when user just opens or refreshes the page)
+    # THIS MUST BE OUTSIDE THE 'if request.method == "POST":' BLOCK
+    # ---------------------------------------------------------
+    return render_template('GetUserNumberByLogin.html', result=None)
 
-        return json.loads(result.stdout)
-
-    except subprocess.TimeoutExpired:
-        print("Skrypt przekroczył limit czasu.")
-        return None
-    except json.JSONDecodeError:
-        print("Nie udało się zdekodować JSON-a.")
-        print("Odpowiedź:", result.stdout)
-        return None
+#============================EXPIRING_PASSWORDS================================
 
 
 
-def group_audit(group_name):
-    try:
-        result = subprocess.run(
-            [
-                "powershell",
-                "-ExecutionPolicy",
-                "Bypass",
-                "-File",
-                ".\\Scripts\\Audit_Group.ps1",
-                group_name,
-            ],
-            capture_output=True,
-            text=True,
-            encoding='latin1',  
-            timeout=260,
-        )
-        if result.returncode != 0:
-            print(f"Error {result.stderr}")
-            return None
-        users_data = json.loads(result.stdout)
-        print(users_data)
-        return {"users": users_data}
-    except subprocess.TimeoutExpired:
-        print("Skrypt przekroczył limit czasu.")
-        return None
-    except json.JSONDecodeError:
-        print("Nie udało się zdekodować JSON-a.")
-        print("Odpowiedź:", result.stdout)
-        return None
-    
-
-def get_group_members(group_name):
-    try:
-        result = subprocess.run(
-            [
-                "powershell",
-                "-ExecutionPolicy",
-                "Bypass",
-                "-File",
-                ".\\Scripts\\Get-GroupMembers.ps1",
-                group_name,
-            ],
-            capture_output=True,
-            text=True,
-            timeout=30,
-        )
-
-        if result.returncode != 0:
-            print(f"Error {result.stderr}")
-            return None
-        print(json.loads(result.stdout))
-        return json.loads(result.stdout)
-
-    except subprocess.TimeoutExpired:
-        print("Skrypt przekroczył limit czasu.")
-        return None
-    except json.JSONDecodeError:
-        print("Nie udało się zdekodować JSON-a.")
-        print("Odpowiedź:", result.stdout)
-        return None
 
 
-def get_user_by_number(phone_number):
-    try:
-        result = subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-File", ".\\Scripts\\Get-UserByNumber.ps1", phone_number], capture_output=True, text=True, timeout=30)
 
-        if result.returncode != 0:
-            print(f'Error {result.stderr}')
-            return None
-        print(json.loads(result.stdout))
-        return json.loads(result.stdout)
-    
-    except subprocess.TimeoutExpired:
-        print("Skrypt przekroczył limit czasu.")
-        return None
-    except json.JSONDecodeError:
-        print("Nie udało się zdekodować JSON-a.")
-        print("Odpowiedź:", result.stdout)
-        return None
 
-def get_all_groups_of_user(user_name):
 
-    try:
-        result = subprocess.run(
-            [
-                "powershell",
-                "-ExecutionPolicy",
-                "Bypass",
-                "-File",
-                ".\\Scripts\\Get-Groupsofuser.ps1",
-                user_name,
-            ],
-            capture_output=True,
-            text=True,
-            timeout=300,
-        )
 
-        if result.returncode != 0:
-            print(f"Error {result.stderr}")
-            return None
-        print(json.loads(result.stdout))
-        return json.loads(result.stdout)
 
-    except subprocess.TimeoutExpired:
-        print("Skrypt przekroczył limit czasu.")
-        return None
-    except json.JSONDecodeError:
-        print("Nie udało się zdekodować JSON-a.")
-        print("Odpowiedź:", result.stdout)
-        return None
-
-#Awaiting script
-def get_change_history_of_user(user_name):
-    try:
-        result = subprocess.run(
-            [
-                "powershell",
-                "-ExecutionPolicy",
-                "Bypass",
-                "-File",
-                ".\\Scripts\\Get-UserChangeHistory.ps1",
-                user_name,
-            ],
-            capture_output=True,
-            text=True,
-            timeout=30,
-        )
-
-        if result.returncode != 0:
-            print(f"Error {result.stderr}")
-            return None
-        print(json.loads(result.stdout))
-        return json.loads(result.stdout)
-
-    except subprocess.TimeoutExpired:
-        print("Skrypt przekroczył limit czasu.")
-        return None
-    except json.JSONDecodeError:
-        print("Nie udało się zdekodować JSON-a.")
-        print("Odpowiedź:", result.stdout)
-        return None
-
-def get_change_history_of_group(group_name):
-    try:
-        result = subprocess.run(
-            [
-                "powershell",
-                "-ExecutionPolicy",
-                "Bypass",
-                "-File",
-                ".\\Scripts\\Audit_Group.ps1",
-                group_name,
-            ],
-            capture_output=True,
-            text=True,
-            timeout=30,
-        )
-
-        if result.returncode != 0:
-            print(f"Error {result.stderr}")
-            return None
-        print(json.loads(result.stdout))
-        return json.loads(result.stdout)
-
-    except subprocess.TimeoutExpired:
-        print("Skrypt przekroczył limit czasu.")
-        return None
-    except json.JSONDecodeError:
-        print("Nie udało się zdekodować JSON-a.")
-        print("Odpowiedź:", result.stdout)
-        return None
-
+#===============================================================================
 if __name__ == "__main__":
     app.run(debug=True)

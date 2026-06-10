@@ -1,41 +1,43 @@
-param(
-    [
-        Parameter(Mandatory=$true)]
-            [ValidatePattern("^[a-zA-Z0-9_.-]+$")]
-            [string]$SAMAccountName,
-        
-            [Parameter(Mandatory=$true)]
-            [string]$ADUsername,
-        
-            [Parameter(Mandatory=$true)]
-            [string]$ADPassword
-        
+param( 
+    [Parameter(Mandatory=$true)]
+    [string]$SAMAccountName
 )
-
-$SecurePassword = ConvertTo-SecureString $ADPassword -AsPlainText -Force
-$Credential = New-Object System.Management.Automation.PSCredential ($ADUsername, $SecurePassword)
 
 $result = @{}
 
 try {
-
-    $user = Get-QADUser -Identity $SAMAccountName -Credential $Credential -Properties Name, SamAccountName, TelephoneNumber, Mobile, OtherMobile
+    # Create an LDAP filter to find the specific user
+    $searcher = [adsisearcher]"(&(objectCategory=person)(objectClass=user)(sAMAccountName=$SAMAccountName))"
+    
+    # Specify which attributes to load to avoid pulling the entire object (improves performance)
+    $searcher.PropertiesToLoad.AddRange(@('name', 'samaccountname', 'telephonenumber', 'mobile', 'othermobile'))
+    
+    # Execute the search
+    $user = $searcher.FindOne()
 
     if ($user) {
         $result = @{
-            Name           = $user.Name
-            sAMAccountName = $user.SamAccountName
-            Telephone      = $user.TelephoneNumber
-            Mobile         = $user.Mobile
-            OtherMobile    = $user.OtherMobile
+            Name = $user.Properties['name'][0]
+            sAMAccountName = $user.Properties['samaccountname'][0]
+            Telephone = $user.Properties['telephonenumber'][0]
+            Mobile = $user.Properties['mobile'][0]
+            OtherMobile = $user.Properties['othermobile'][0]
         }
     } else {
         $result.error = "UserNotFound"
     }
-}
-catch {
+} catch {
     $result.error = "LookupError"
     $result.details = $_.Exception.Message
 }
 
-return $result | ConvertTo-Json -Depth 3
+# Output the result as JSON
+$jsonOutput = $result | ConvertTo-Json -Depth 3
+
+# --- DEBUG LOG ---
+# Saving to scripts folder
+#$logFilePath = Join-Path -Path $PSScriptRoot -ChildPath "debug_output.json"
+#$jsonOutput | Out-File -FilePath $logFilePath -Encoding UTF8
+
+# Return JSON to python
+return $jsonOutput

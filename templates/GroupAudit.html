@@ -16,26 +16,17 @@
 <div style="margin-top: 50px;"></div>
 
 {% if result and result['users'] %}
-    <h2>User:</h2>
+    <h2>Members({{result.users | length}}):</h2>
     <table>
         <thead>
             <tr>
-                {% for key in result['users'][0].keys() %}
-                    <th>{{ key | upper }}</th>
-                {% endfor %}
+                {% for user in result.users %}
+                    <td>{{ user }}</td>
             </tr>
-        </thead>
-        <tbody>
-            {% for user in result['users'] %}
-                <tr>
-                    {% for value in user.values() %}
-                        <td>{{ value }}</td>
-                    {% endfor %}
-                </tr>
             {% endfor %}
         </tbody>
     </table>
-{% else %}
+{% elif result and result.error %}
     <p>No users</p>
 {% endif %}
 
