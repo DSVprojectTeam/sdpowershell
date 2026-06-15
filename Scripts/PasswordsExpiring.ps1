@@ -1,3 +1,4 @@
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8 
 # Configuration parameters 
 $maxPasswordAgeDays = 90
 $daysToExpiry = 7

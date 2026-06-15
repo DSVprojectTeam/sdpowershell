@@ -221,16 +221,13 @@ def get_change_history_of_group(group_name):
     
 
 
-def get_expired_passwords(group_name): 
-    if not group_name:
-        return None
+def get_expiring_passwords(): 
     try:
         result = subprocess.run(
             [
                 "powershell",
                 "-ExecutionPolicy", "Bypass",
-                "-File", ".\\Scripts\\Get-GroupMembers.ps1",
-                group_name.strip()
+                "-File", ".\\Scripts\\PasswordsExpiring.ps1",
             ],
             capture_output=True,
             text=True,

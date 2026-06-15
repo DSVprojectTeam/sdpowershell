@@ -1,5 +1,5 @@
 from flask import Flask, render_template, url_for, request
-from helpers import get_all_groups_of_user , get_change_history_of_group , get_change_history_of_user , get_group_members , get_user_by_number , get_user_number_by_login
+from helpers import get_all_groups_of_user , group_audit , get_expiring_passwords , get_group_members , get_user_by_number , get_user_number_by_login
 import json
 import os
 import tempfile
@@ -49,6 +49,7 @@ def PullMembersOfAgroup():
 
 
 #==========================FIND_USER_BY_PHONE=============================================
+
 @app.route('/GetUserByPhoneNumber', methods=['GET', 'POST'])
 def GetUserByPhoneNumber():
 
@@ -80,9 +81,47 @@ def GetAllGroupsaUserIsaMemberOf():
         )
     return render_template("GetAllGroupsaUserIsaMemberOf.html")
 
+#====================================FIND_USER_PHONE_NUMBER============================================
+
+@app.route('/GetUserNumberByLogin', methods=['GET', 'POST'])
+def GetUserNumberByLogin():
+
+    if request.method == 'POST':
+        searched_login = request.form.get('searched_login')
+
+        # Execute PowerShell script via helper function
+        data = get_user_number_by_login(searched_login )
+
+        final_result = {}
+
+        # Safely handle the data returned from PowerShell
+        if isinstance(data, dict):
+            # If data is already a dictionary, use it directly
+            final_result = data
+        elif isinstance(data, str) and data.strip():
+            # If data is a string, try to parse it as JSON
+            try:
+                final_result = json.loads(data)
+            except Exception as e:
+                final_result = {"Error": f"Unable to parse data: {data}"}
+        else:
+            # If data is None or empty string
+            final_result = {"Error": "Script did not return any data."}
+
+        # Return the results for POST request
+        return render_template(
+            'GetUserNumberByLogin.html',
+            searched_login=searched_login,
+            result=final_result
+        )
+
+    # ---------------------------------------------------------
+    # Handle GET request (when user just opens or refreshes the page)
+    # THIS MUST BE OUTSIDE THE 'if request.method == "POST":' BLOCK
+    # ---------------------------------------------------------
+    return render_template('GetUserNumberByLogin.html', result=None)
 
 #===============================Group_AUDIT====================================
-
 @app.route('/GroupAudit', methods=["GET", "POST"])
 def GroupAudit():
     if request.method == "POST":
@@ -128,55 +167,31 @@ def MassAudit():
     return render_template('MassAudit.html', result=None)
 
 
-#====================================FIND_USER_PHONE_NUMBER============================================
+#=========================EXPIRING_PASSWORDS=================================== 
 
-@app.route('/GetUserNumberByLogin', methods=['GET', 'POST'])
-def GetUserNumberByLogin():
-
-    if request.method == 'POST':
-        searched_login = request.form.get('searched_login')
-
-        # Execute PowerShell script via helper function
-        data = get_user_number_by_login(searched_login )
-
+@app.route("/ExpiringPasswords", methods=["GET", "POST"])
+def ExpiringPasswords():
+    if request.method == "POST":
+        # Скрипт не требует аргументов, поэтому просто вызываем функцию
+        data = get_expiring_passwords()
+        
         final_result = {}
-
-        # Safely handle the data returned from PowerShell
-        if isinstance(data, dict):
-            # If data is already a dictionary, use it directly
+        
+        if data:
+            # Так как helpers.py уже возвращает распарсенный JSON (словарь), 
+            # просто передаем его дальше
             final_result = data
-        elif isinstance(data, str) and data.strip():
-            # If data is a string, try to parse it as JSON
-            try:
-                final_result = json.loads(data)
-            except Exception as e:
-                final_result = {"Error": f"Unable to parse data: {data}"}
         else:
-            # If data is None or empty string
-            final_result = {"Error": "Script did not return any data."}
-
-        # Return the results for POST request
+            final_result = {"Error": "Script did not return any data or an error occurred."}
+            
+        # ОЧЕНЬ ВАЖНО: возвращаем правильный шаблон!
         return render_template(
-            'GetUserNumberByLogin.html',
-            searched_login=searched_login,
+            "ExpiringPasswords.html",
             result=final_result
         )
-
-    # ---------------------------------------------------------
-    # Handle GET request (when user just opens or refreshes the page)
-    # THIS MUST BE OUTSIDE THE 'if request.method == "POST":' BLOCK
-    # ---------------------------------------------------------
-    return render_template('GetUserNumberByLogin.html', result=None)
-
-#============================EXPIRING_PASSWORDS================================
-
-
-
-
-
-
-
-
+        
+    # Если это GET-запрос (пользователь просто открыл страницу)
+    return render_template("ExpiringPasswords.html")
 
 
 #===============================================================================
