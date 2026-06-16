@@ -1,10 +1,10 @@
-from flask import Flask, render_template, url_for, request
+from flask import Flask, render_template, request
 from helpers import get_all_groups_of_user , group_audit , get_expiring_passwords , get_group_members , get_user_by_number , get_user_number_by_login
 import json
 import os
 import tempfile
 import csv
-from flask import request, render_template, send_file
+from flask import request, render_template
 
 
 #STATIC VARIABLE
@@ -172,25 +172,23 @@ def MassAudit():
 @app.route("/ExpiringPasswords", methods=["GET", "POST"])
 def ExpiringPasswords():
     if request.method == "POST":
-        # Скрипт не требует аргументов, поэтому просто вызываем функцию
+        # There is noo need in additional data
         data = get_expiring_passwords()
         
         final_result = {}
         
         if data:
-            # Так как helpers.py уже возвращает распарсенный JSON (словарь), 
-            # просто передаем его дальше
+            # Pass json 
             final_result = data
         else:
             final_result = {"Error": "Script did not return any data or an error occurred."}
             
-        # ОЧЕНЬ ВАЖНО: возвращаем правильный шаблон!
         return render_template(
             "ExpiringPasswords.html",
             result=final_result
         )
         
-    # Если это GET-запрос (пользователь просто открыл страницу)
+    # GET > opening the page
     return render_template("ExpiringPasswords.html")
 
 

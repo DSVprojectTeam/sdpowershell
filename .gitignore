@@ -51,3 +51,4 @@ dist/
 # PowerShell
 *.ps1xml
 *.clixml
+startvenv.txt
